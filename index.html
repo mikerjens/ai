@@ -28,7 +28,7 @@ let livePlan=null,syncError='',syncBusy=false;
 const sheetURL='https://docs.google.com/spreadsheets/d/1vCKfMTNwqCJ8DNY12yg1at4jUDjnTBJnTpRgFLvbiCk/edit';
 const norm=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
 function sourceTable(name,firstHeader){const raw=livePlan?.tabs[name]||[];const i=raw.findIndex(r=>norm(r[0])===norm(firstHeader));if(i<0)return {headers:[],rows:[]};return {headers:raw[i],rows:raw.slice(i+1).filter(r=>r.some(c=>String(c).trim()))}}
-const sceneRows=()=>sourceTable('SCENER','ID').rows.filter(r=>/^[HNL]\d+$/.test(r[0]||''));
+const sceneRows=()=>sourceTable('SCENER','ID').rows.filter(r=>/^(?:[HNL]|TP)\d+$/.test(r[0]||''));
 const proposals=()=>sourceTable('OPTAGEFORSLAG','Dato').rows.filter(r=>sourceDate(r[0]));
 function sourceDate(v){let m=String(v||'').match(/^(\d{1,2})[/.](\d{1,2})[/.](\d{4})$/);if(m)return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;m=String(v||'').match(/^(\d{4})-(\d{2})-(\d{2})/);return m?m[0]:null}
 function dateLabel(v){const d=sourceDate(v);return d?new Date(d+'T12:00').toLocaleDateString('da-DK',{weekday:'long',day:'numeric',month:'long'}):v}
