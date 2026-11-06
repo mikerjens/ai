@@ -52,7 +52,7 @@ function changeLogHTML(){
  const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Atlantic/Faroe'}).format(new Date());
  const anchor=new Date(today+'T12:00:00Z');
  const rows=sourceTable('ÆNDRINGSLOG','Registreret').rows;
- return '<section class="card"><h2>Seneste ændringer</h2><p class="muted">Fælles historik for produktionen, hentet fra Google Sheets.</p>'
+ return '<section class="card"><h2>Seneste ændringer</h2><p class="muted">Fælles historik fra Google Sheets. Historikken begynder, når registreringsscriptet er aktiveret.</p>'
  + ['I dag','I går','For 2 dage siden'].map((label,i)=>{
  const day=new Date(anchor.getTime()-i*86400000).toISOString().slice(0,10);
  const changes=rows.filter(r=>r[1]===day).reverse();
