@@ -48,6 +48,18 @@ function isDone(v){return /^(færdig|afsluttet|udført|done|complete|completed|a
 function updatePersonOptions(){const names=team.map(t=>t[0]);if(!names.includes('Ansvarlig afklares'))names.push('Ansvarlig afklares');if(!names.includes(person))person=names[0]||'Ansvarlig afklares';$('#person').innerHTML=names.map(n=>`<option>${esc(n)}</option>`).join('');$('#person').value=person}
 function syncNotice(){const notice=document.querySelector('main > .notice');if(!notice)return;const old=livePlan&&Date.now()-Date.parse(livePlan.sourceAt)>35*60000;notice.className='notice plan-status'+(old||syncError?' plan-status-warning':'');const stamp=livePlan?new Date(livePlan.sourceAt).toLocaleString('da-DK',{timeZone:'Atlantic/Faroe',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'';notice.innerHTML=`<div class="plan-status-copy"><span class="plan-status-dot" aria-hidden="true"></span><span>${livePlan?`Senest opdateret ${stamp}`:syncError?'Planen kunne ikke opdateres':'Henter planen…'}</span>${livePlan&&(old||syncError)?'<span class="plan-status-alert">Viser seneste tilgængelige plan</span>':''}</div><div class="plan-status-actions"><button class="plan-status-refresh" id="sync-refresh" aria-label="Opdatér produktionsplan">${syncBusy?'Opdaterer…':'Opdatér'}</button></div>`;$('#sync-refresh').disabled=syncBusy;$('#sync-refresh').onclick=refreshProduction}
 
+function changeLogHTML(){
+ const today=new Intl.DateTimeFormat('sv-SE',{timeZone:'Atlantic/Faroe'}).format(new Date());
+ const anchor=new Date(today+'T12:00:00Z');
+ const rows=sourceTable('ÆNDRINGSLOG','Registreret').rows;
+ return '<section class="card"><h2>Seneste ændringer</h2><p class="muted">Fælles historik for produktionen, hentet fra Google Sheets.</p>'
+ + ['I dag','I går','For 2 dage siden'].map((label,i)=>{
+ const day=new Date(anchor.getTime()-i*86400000).toISOString().slice(0,10);
+ const changes=rows.filter(r=>r[1]===day).reverse();
+ return '<div style="margin:24px 0"><h3>'+label+'</h3><small class="muted">'+esc(day)+'</small>'
+ +(changes.length?changes.map(r=>'<article class="task"><b>'+esc(r[2]||'Aktivitet')+' · '+esc(r[3]||'Ændring')+'</b><p>'+esc(r[4]||'')+' → '+esc(r[5]||'')+'</p><small class="muted">'+esc(r[0]||'')+'</small></article>').join(''):'<p class="muted">Ingen registrerede ændringer.</p>')+'</div>';
+ }).join('')+'</section>';
+}
 function renderSourceViews(){if(!livePlan){$('#view').innerHTML='<div class="card live-empty"><h2>Planen hentes fra Google Sheets</h2><p>Der vises ingen indbygget kladde som erstatning for den aktuelle plan.</p></div>';syncNotice();return}if(tab==='weather'){renderDraft();syncNotice();return}document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));$('#title').textContent={home:'Produktionsoverblik',mine:'Min plan',changes:'Seneste ændringer',plan:'Produktionsplan',tasks:'Alle opgaver',team:'TEAM'}[tab];let html='';
 if(tab==='home')html=liveOverview();
 if(tab==='changes')html=changeLogHTML();
